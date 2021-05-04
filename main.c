@@ -2,31 +2,7 @@
 #include <stdlib.h>
 #include "rubiks.h"
 
-int side_to_index(T_SIDE side) {
 
-    switch(side) {
-        case FRONT :return 2;
-        case BACK : return 4;
-        case UP :   return 0;
-        case DOWN : return 5;
-        case LEFT : return 1;
-        case RIGHT :return 3;
-
-    }
-}
-
-T_COLOR side_to_color(T_SIDE side) {
-
-    switch(side) {
-        case FRONT :return G;
-        case BACK : return B;
-        case UP :   return W;
-        case DOWN : return Y;
-        case LEFT : return O;
-        case RIGHT :return R;
-
-    }
-}
 
 int main(){
     RUBIKS *rubiks;

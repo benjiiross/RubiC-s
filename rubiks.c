@@ -48,20 +48,20 @@
  * returns : color in whole letter to print in color in console
  * type    : int
  */
-/*
-int select_color(T_COLOR color) {
 
-    switch(color) {
-        case R : return RED;
-        case B : return BLUE;
-        case G : return GREEN;
-        case W : return WHITE;
-        case O : return LIGHTRED;
-        case Y : return YELLOW;
-        case LG :return LIGHTGRAY;
+
+int side_to_index(T_SIDE side) {
+
+    switch(side) {
+        case FRONT :return 2;
+        case BACK : return 4;
+        case UP :   return 0;
+        case DOWN : return 5;
+        case LEFT : return 1;
+        case RIGHT :return 3;
+
     }
-}
-*/
+
 /*
  * Function : side_to_color
  * ------------------------
@@ -70,7 +70,6 @@ int select_color(T_COLOR color) {
  * Top color is White, Left one is Orange etc.
  * type    : T_COLOR
  */
-
 T_COLOR side_to_color(T_SIDE side) {
 
     switch(side) {
@@ -115,18 +114,7 @@ char select_letter(T_COLOR color) {
  * type    : int
  */
 
-int side_to_index(T_SIDE side) {
 
-    switch(side) {
-        case FRONT :return 2;
-        case BACK : return 4;
-        case UP :   return 0;
-        case DOWN : return 5;
-        case LEFT : return 1;
-        case RIGHT :return 3;
-
-    }
-}
 
 
 /*
@@ -254,24 +242,4 @@ void fill_rubiks(RUBIKS* rubiks) {
     scanf("%d %d %d %c", face, coord[0], coord[1], color);
     rubiks->faces[face].grid[coord[0]][coord[1]] = color;
 
-}
-
-int main() {
-    RUBIKS *rubiks;
-
-    rubiks = create_rubiks();
-    init_rubiks(rubiks);
-    display_rubiks(rubiks);
-    printf("%d", rubiks->faces[UP].side);
-    rubiks->faces[side_to_index(DOWN)].grid[1][2] = R;
-    display_rubiks(rubiks);
-
-    blank_rubiks(rubiks);
-    display_rubiks(rubiks);
-
-    fill_rubiks(rubiks);
-    display_rubiks(rubiks);
-
-    free(rubiks);
-    return 0;
 }
