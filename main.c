@@ -1,25 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rubiks.h"
+#include "rubiks.c"
 
 
-
-int main(){
+int main() {
     RUBIKS *rubiks;
 
-    rubiks = create_rubiks();
+    rubiks = create_rubiks(); /* malloc */
     init_rubiks(rubiks);
+
+    rubiks->faces[side_to_index(FRONT)].grid[0][2] = R;
+    rubiks->faces[side_to_index(FRONT)].grid[1][1] = B;
+    rubiks->faces[side_to_index(FRONT)].grid[2][2] = Y;
+    rubiks->faces[side_to_index(FRONT)].grid[0][1] = O;
+    rubiks->faces[side_to_index(FRONT)].grid[2][1] = LG;
+    rubiks->faces[side_to_index(FRONT)].grid[0][0] = B;
     display_rubiks(rubiks);
-    printf("%d", rubiks->faces[UP].side);
-    rubiks->faces[side_to_index(DOWN)].grid[1][2] = R;
+
+    front_clockwise(rubiks, 1);
     display_rubiks(rubiks);
 
     blank_rubiks(rubiks);
-    display_rubiks(rubiks);
-
-    fill_rubiks(rubiks);
-    display_rubiks(rubiks);
-
-    free(rubiks);
+    free_rubiks(rubiks);
     return 0;
-    }
+}
