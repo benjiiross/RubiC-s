@@ -1,5 +1,3 @@
-#ifndef RUBIKS_H
-#define RUBIKS_H
 typedef enum {R, B, G, W, Y, O, LG} T_COLOR;
 typedef enum {FRONT, BACK, UP, DOWN, RIGHT, LEFT} T_SIDE;
 
@@ -17,5 +15,3 @@ void display_rubiks(RUBIKS*);
 void fill_rubiks(RUBIKS*);
 void init_rubiks(RUBIKS*);
 RUBIKS* create_rubiks();
-
-#endif
