@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rubiks.h"
-
+#include <time.h>
 
 /*
  * =========
@@ -47,6 +47,7 @@
  * returns : color in whole letter to print in color in console
  * type    : int
  */
+
 /*
 int select_color(T_COLOR color) {
 
@@ -234,14 +235,11 @@ void display_rubiks(RUBIKS* rubiks) {
 }
 
 /*
- * Function : fill_rubiks
+ * Function : free_rubiks
  * ----------------------
  *
- *
- *
+ * Frees the malloc-ated rubiks
  */
-
-
 
 void free_rubiks(RUBIKS* rubiks) {
     free(rubiks);
@@ -438,37 +436,42 @@ void down_clockwise(RUBIKS* rubiks) {
     }
 }
 
+/*
+ * Function : scramble_rubiks
+ * ----------------------
+ *  !!!!! TO CHANGE !!!!!!
+ * scrambles the rubiks by doing random movements
+ */
+
+void scramble_rubiks(RUBIKS* rubiks) {
+
+    int i, j, k;
+    int colors[2] = {8, 8};
+    srand(time(NULL));
+    for (i=0;i<6;i++) {
+        for (j=0;j<3;j++) {
+            for (k=0;k<3;k++)
+                rubiks->faces[i].grid[j][k] = rand()%6;
+        }
+
+    }
+    rubiks->faces[side_to_index(FRONT)].grid[1][1] = side_to_color(rubiks->faces[FRONT].side);
+    rubiks->faces[side_to_index(UP)].grid[1][1] = side_to_color(rubiks->faces[UP].side);
+    rubiks->faces[side_to_index(LEFT)].grid[1][1] = side_to_color(rubiks->faces[LEFT].side);
+    rubiks->faces[side_to_index(RIGHT)].grid[1][1] = side_to_color(rubiks->faces[RIGHT].side);
+    rubiks->faces[side_to_index(BACK)].grid[1][1] = side_to_color(rubiks->faces[BACK].side);
+    rubiks->faces[side_to_index(DOWN)].grid[1][1] = side_to_color(rubiks->faces[DOWN].side);
+}
+
 int main() {
     RUBIKS *rubiks;
 
     rubiks = create_rubiks(); /* malloc */
     init_rubiks(rubiks);
     blank_rubiks(rubiks);
-    rubiks->faces[side_to_index(FRONT)].grid[2][0] = R;
-    rubiks->faces[side_to_index(FRONT)].grid[2][1] = G;
-    rubiks->faces[side_to_index(FRONT)].grid[2][2] = B;
-    rubiks->faces[side_to_index(DOWN)].grid[2][0] = R;
-    rubiks->faces[side_to_index(DOWN)].grid[2][1] = G;
-    rubiks->faces[side_to_index(DOWN)].grid[2][2] = B;
-
+    scramble_rubiks(rubiks);
     display_rubiks(rubiks);
 
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
-    down_clockwise(rubiks);
-    display_rubiks(rubiks);
 
     blank_rubiks(rubiks);
     free_rubiks(rubiks);
