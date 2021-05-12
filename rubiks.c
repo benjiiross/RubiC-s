@@ -266,36 +266,211 @@ void fill_rubiks(RUBIKS* rubiks) {
     rubiks->faces[face].grid[coord[0]][coord[1]] = color;
 }
 
-void front_clockwise(RUBIKS* rubiks, int type) {
-/* si type == 1 : Quart de tour
-   si type == 2 : demi - tour */
+
+/*
+ * ===========
+ * 3 ROTATIONS
+ * ===========
+ */
+
+void up_clockwise(RUBIKS* rubiks) {
+    //lmao that works too
+    //fuck this project
+    int i, j, k;
+    T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
+
+    for (i=0;i<3;i++) {
+        for (j=0;j<3;j++)
+            tempGrid[i][j] = rubiks->faces[side_to_index(UP)].grid[i][j]; // Store temp grid
+        tempGrid[3][i] = rubiks->faces[side_to_index(FRONT)].grid[0][i]; // Stores temp FRONT side
+    }
+
+    // Rotating UP face
+    for (i=0;i<3;i++) {
+        for(j=0;j<3;j++)
+            rubiks->faces[side_to_index(UP)].grid[i][j] = tempGrid[2-j][i];
+    }
+    // Rotating sides
+    for (i=0;i<3;i++) {
+        rubiks->faces[side_to_index(FRONT)].grid[0][i] = rubiks->faces[side_to_index(RIGHT)].grid[0][i];
+        rubiks->faces[side_to_index(RIGHT)].grid[0][i] = rubiks->faces[side_to_index(BACK)].grid[0][i];
+        rubiks->faces[side_to_index(BACK)].grid[0][i] = rubiks->faces[side_to_index(LEFT)].grid[0][i];
+        rubiks->faces[side_to_index(LEFT)].grid[0][i] = tempGrid[3][i];
+    }
+}
+
+void left_clockwise(RUBIKS* rubiks) {
+    //works
+
+
+
+
+
+
+
+
+
+    //ffs stop reading BITCH
 
     int i, j, k;
-    T_COLOR tempGrid[3][3];
+    T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
 
-    if (type == 1) {
-        for (i=0;i<3;i++) {
-            for (j=0;j<3;j++)
-                tempGrid[i][j] = rubiks->faces[side_to_index(FRONT)].grid[i][j]; /* Store temp grid */
-        }
-
-        /*
-            A B C   G D A
-            D E F = H E B
-            G H I   I F C
-        */
-
-        for (i=0;i<3;i++) {
-            rubiks->faces[side_to_index(FRONT)].grid[i][0] = tempGrid[2][i];
-            rubiks->faces[side_to_index(FRONT)].grid[i][1] = tempGrid[1][i];
-            rubiks->faces[side_to_index(FRONT)].grid[i][2] = tempGrid[0][i];
-        }
-
-        for (i=0;i<3;i++) {
-            tempGrid[0][i] = rubiks->faces[side_to_index(UP)].grid[3][i]; /* Store temp grid */
-            rubiks->faces[side_to_index(UP)].grid[2][] = tempGrid[0][i]; }
+    for (i=0;i<3;i++) {
+        for (j=0;j<3;j++)
+            tempGrid[i][j] = rubiks->faces[side_to_index(LEFT)].grid[i][j]; // Store temp grid
+        tempGrid[3][i] = rubiks->faces[side_to_index(FRONT)].grid[i][0]; // Stores temp FRONT side
     }
-    
+    // Rotates LEFT
+    for (i=0;i<3;i++) {
+        for(j=0;j<3;j++)
+            rubiks->faces[side_to_index(LEFT)].grid[i][j] = tempGrid[2-j][i];
+    }
+
+    for (i=0;i<3;i++) {
+        rubiks->faces[side_to_index(FRONT)].grid[i][0] = rubiks->faces[side_to_index(UP)].grid[i][0];
+        rubiks->faces[side_to_index(UP)].grid[i][0] = rubiks->faces[side_to_index(BACK)].grid[2-i][2];
+        rubiks->faces[side_to_index(BACK)].grid[2-i][2] = rubiks->faces[side_to_index(DOWN)].grid[i][0];
+        rubiks->faces[side_to_index(DOWN)].grid[i][0] = tempGrid[3][i];
+    }
+}
+
+void front_clockwise(RUBIKS* rubiks) {
+
+    /*works omg
+    //PLEASE DONT TOUCH
+    //PLEASE FFS MAN
+    //why am i putting '//' am i retarded ?*/
+    int i, j, k;
+    T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
+
+    for (i=0;i<3;i++) {
+        for (j=0;j<3;j++)
+            tempGrid[i][j] = rubiks->faces[side_to_index(FRONT)].grid[i][j]; // Store temp grid
+        tempGrid[3][i] = rubiks->faces[side_to_index(UP)].grid[2][i]; // Stores temp UP side
+    }
+
+    // Rotating FRONT face
+    for (i=0;i<3;i++) {
+        for(j=0;j<3;j++)
+            rubiks->faces[side_to_index(FRONT)].grid[i][j] = tempGrid[2-j][i];
+    }
+    // Rotating sides
+    for (i=0;i<3;i++) {
+        rubiks->faces[side_to_index(UP)].grid[2][i] = rubiks->faces[side_to_index(LEFT)].grid[i][2];
+        rubiks->faces[side_to_index(LEFT)].grid[i][2] = rubiks->faces[side_to_index(DOWN)].grid[0][i];
+        rubiks->faces[side_to_index(DOWN)].grid[0][i] = rubiks->faces[side_to_index(RIGHT)].grid[i][0];
+        rubiks->faces[side_to_index(RIGHT)].grid[i][0] = tempGrid[3][i];
+    }
+}
+
+void right_clockwise(RUBIKS* rubiks) {
+    //wip JK IT FUCKING WORKS
+
+    int i, j, k;
+    T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
+
+    for (i=0;i<3;i++) {
+        for (j=0;j<3;j++)
+            tempGrid[i][j] = rubiks->faces[side_to_index(RIGHT)].grid[i][j]; // Store temp grid
+        tempGrid[3][i] = rubiks->faces[side_to_index(FRONT)].grid[i][2]; // Stores temp UP side
+    }
+
+    for (i=0;i<3;i++) {
+        for(j=0;j<3;j++)
+            rubiks->faces[side_to_index(RIGHT)].grid[i][j] = tempGrid[2-j][i];
+    }
+
+    for (i=0;i<3;i++) {
+        rubiks->faces[side_to_index(FRONT)].grid[i][2] = rubiks->faces[side_to_index(DOWN)].grid[i][2];
+        rubiks->faces[side_to_index(DOWN)].grid[i][2] = rubiks->faces[side_to_index(BACK)].grid[2-i][0];
+        rubiks->faces[side_to_index(BACK)].grid[2-i][0] = rubiks->faces[side_to_index(UP)].grid[i][2];
+        rubiks->faces[side_to_index(UP)].grid[i][2] = tempGrid[3][i];
+    }
+
+}
+
+void back_clockwise(RUBIKS* rubiks) {
 
 
+    int i, j, k;
+    T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
+
+    for (i=0;i<3;i++) {
+        for (j=0;j<3;j++)
+            tempGrid[i][j] = rubiks->faces[side_to_index(BACK)].grid[i][j]; // Store temp grid
+        tempGrid[3][i] = rubiks->faces[side_to_index(UP)].grid[0][i]; // Stores temp UP side
+    }
+
+    for (i=0;i<3;i++) {
+        for(j=0;j<3;j++)
+            rubiks->faces[side_to_index(BACK)].grid[i][j] = tempGrid[2-j][i];
+    }
+
+    for (i=0;i<3;i++) {
+        rubiks->faces[side_to_index(UP)].grid[0][i] = rubiks->faces[side_to_index(RIGHT)].grid[i][2];
+        rubiks->faces[side_to_index(RIGHT)].grid[i][2] = rubiks->faces[side_to_index(DOWN)].grid[2][i];
+        rubiks->faces[side_to_index(DOWN)].grid[2][i] = rubiks->faces[side_to_index(LEFT)].grid[i][0];
+        rubiks->faces[side_to_index(LEFT)].grid[i][0] = tempGrid[3][i];
+    }
+}
+
+void down_clockwise(RUBIKS* rubiks) {
+
+    int i, j, k;
+    T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
+
+    for (i=0;i<3;i++) {
+        for (j=0;j<3;j++)
+            tempGrid[i][j] = rubiks->faces[side_to_index(DOWN)].grid[i][j]; // Store temp grid
+        tempGrid[3][i] = rubiks->faces[side_to_index(FRONT)].grid[2][i]; // Stores temp UP side
+    }
+
+    for (i=0;i<3;i++) {
+        for(j=0;j<3;j++)
+            rubiks->faces[side_to_index(DOWN)].grid[i][j] = tempGrid[2-j][i];
+    }
+
+    for (i=0;i<3;i++) {
+        rubiks->faces[side_to_index(FRONT)].grid[2][i] = rubiks->faces[side_to_index(LEFT)].grid[2][i];
+        rubiks->faces[side_to_index(LEFT)].grid[2][i] = rubiks->faces[side_to_index(BACK)].grid[2][i];
+        rubiks->faces[side_to_index(BACK)].grid[2][i] = rubiks->faces[side_to_index(RIGHT)].grid[2][i];
+        rubiks->faces[side_to_index(RIGHT)].grid[2][i] = tempGrid[3][i];
+    }
+}
+
+int main() {
+    RUBIKS *rubiks;
+
+    rubiks = create_rubiks(); /* malloc */
+    init_rubiks(rubiks);
+    blank_rubiks(rubiks);
+    rubiks->faces[side_to_index(FRONT)].grid[2][0] = R;
+    rubiks->faces[side_to_index(FRONT)].grid[2][1] = G;
+    rubiks->faces[side_to_index(FRONT)].grid[2][2] = B;
+    rubiks->faces[side_to_index(DOWN)].grid[2][0] = R;
+    rubiks->faces[side_to_index(DOWN)].grid[2][1] = G;
+    rubiks->faces[side_to_index(DOWN)].grid[2][2] = B;
+
+    display_rubiks(rubiks);
+
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+    down_clockwise(rubiks);
+    display_rubiks(rubiks);
+
+    blank_rubiks(rubiks);
+    free_rubiks(rubiks);
+    return 0;
 }
