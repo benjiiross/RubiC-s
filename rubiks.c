@@ -290,7 +290,7 @@ void rotate_face(int rotations, T_SIDE face, RUBIKS* rubiks) {
 }
 
 /*
- * Functions : {face_name}_clockwise
+ * Functions : rotate_{face_name}
  * ----------------------
  *
  * Rotates a face in clockwise direction
@@ -298,8 +298,7 @@ void rotate_face(int rotations, T_SIDE face, RUBIKS* rubiks) {
  */
 
 void rotate_up(RUBIKS* rubiks) {
-    //lmao that works too
-    //fuck this project
+
     int i, j;
     T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
 
@@ -331,17 +330,6 @@ void rotate_upC(RUBIKS* rubiks) {
 }
 
 void rotate_left(RUBIKS* rubiks) {
-    //works
-
-
-
-
-
-
-
-
-
-    //ffs stop reading BITCH
 
     int i, j;
     T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
@@ -374,10 +362,6 @@ void rotate_leftC(RUBIKS* rubiks) {
 
 void rotate_front(RUBIKS* rubiks) {
 
-    /*works omg
-    //PLEASE DONT TOUCH
-    //PLEASE FFS MAN
-    //why am i putting '//' am i retarded ?*/
     int i, j;
     T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
 
@@ -409,7 +393,6 @@ void rotate_frontC(RUBIKS* rubiks) {
 }
 
 void rotate_right(RUBIKS* rubiks) {
-    //wip JK IT FUCKING WORKS
 
     int i, j;
     T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
@@ -628,7 +611,7 @@ void white_cross(RUBIKS* rubiks) {
     int location;
 
     while (!(all_four_white(rubiks))) { // while the white cross isn't there
-        location = middle_white(rubiks); // location stores face name + grid pos of white face
+        location = middle_white(rubiks); // location stores face name
 
         switch(location) {
             case DOWN :
@@ -672,8 +655,8 @@ void white_cross(RUBIKS* rubiks) {
     while (rubiks->faces[FRONT].grid[0][1] != G) // green on top of front face
         rotate_up(rubiks);
 
-    //omg that is gonna suck so much
-    while (!(perfect_cross(rubiks))) { // while u don't suck my dick for ages
+
+    while (!(perfect_cross(rubiks))) {
         if (rubiks->faces[LEFT].grid[0][1] == O && rubiks->faces[BACK].grid[0][1] != B) {
             rotate_right(rubiks);
             rotate_up(rubiks);
@@ -710,6 +693,21 @@ void white_cross(RUBIKS* rubiks) {
 void white_face(RUBIKS* rubiks) {
     display_rubiks(rubiks);
 
+    int i;
+    for (i=0;i<5;i++) {
+        if (rubiks->faces[DOWN].grid[0][1] == W || rubiks->faces[DOWN].grid[1][0] == W ||
+        rubiks->faces[DOWN].grid[1][2] == W || rubiks->faces[DOWN].grid[2][1] == W) { // if there is white under
+            while(rubiks->faces[DOWN].grid[2][2] != W) {
+                rotate_down(rubiks);
+            }
+            rotate_right(rubiks);
+            rotate_back(rubiks);
+            rotate_rightC(rubiks);
+        }
+    }
+
+    // here all white faces are somewhere not down
+    display_rubiks(rubiks);
     while (!perfect_white(rubiks)) {
         while (rubiks->faces[UP].grid[0][0] != W && rubiks->faces[LEFT].grid[0][0] != O) {
             rotate_leftC(rubiks);
@@ -717,19 +715,20 @@ void white_face(RUBIKS* rubiks) {
             rotate_left(rubiks);
             rotate_down(rubiks);
             printf("up");
-        }/*
+        }
         while (rubiks->faces[UP].grid[2][0] != W && rubiks->faces[FRONT].grid[0][0] != G) {
             rotate_frontC(rubiks);
             rotate_downC(rubiks);
             rotate_front(rubiks);
             rotate_down(rubiks);
-
-        }*/
+            printf("front");
+        }
         while (rubiks->faces[UP].grid[2][2] != W && rubiks->faces[RIGHT].grid[0][0] != R) {
             rotate_rightC(rubiks);
             rotate_downC(rubiks);
             rotate_right(rubiks);
             rotate_down(rubiks);
+            printf("right");
         }
         while (rubiks->faces[UP].grid[0][2] != W && rubiks->faces[BACK].grid[0][0] != B) {
             rotate_backC(rubiks);
@@ -738,7 +737,7 @@ void white_face(RUBIKS* rubiks) {
             rotate_down(rubiks);
             printf("back");
         }
-        display_rubiks(rubiks);
+        display_rubiks(rubiks);    printf("wesh");
     }
-    printf("wesh");
+
 }
