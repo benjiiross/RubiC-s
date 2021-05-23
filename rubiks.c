@@ -17,8 +17,20 @@
  *   0.5 Logic
  *   1   Init
  *   2   Display & Fill
- *   3   Movements
- *   4   Solving Algorithms
+ *   3   Movements && Algorithms
+ *   4   Solving
+ */
+
+/* TODO
+ * check --------- =========
+ * check .h
+ * main                          done ? parler du blank
+ * put rubiks back on top
+ * flush movements
+ * insert rotate cube
+ * play_rubiks
+ * simplify the equations ? ->
+ *
  */
 
 
@@ -134,6 +146,7 @@ void init_rubiks(RUBIKS* rubiks) {
                 rubiks->faces[i].grid[j][k] = i;
         }
     }
+    rubiks->move_nbr = 0;
 }
 
 
@@ -147,27 +160,8 @@ void init_rubiks(RUBIKS* rubiks) {
 
 
 /*
- * Function : blank_rubiks
- * ------------------------------------
- *
- * Fills the cube with Light Gray color
- */
-
-void blank_rubiks(RUBIKS* rubiks) {
-
-    int i, j, k;
-    for (i=0;i<6;i++) {
-        for (j=0;j<3;j++) {
-            for (k=0;k<3;k++)
-                rubiks->faces[i].grid[j][k] = LG;
-        }
-    }
-}
-
-
-/*
  * Function : disp_main
- * -------------------------------------------
+ * --------------------
  *
  * Displays main
  */
@@ -176,8 +170,7 @@ void disp_main(RUBIKS* rubiks) {
 
     printf("--------------------------------------------------------------------------------\n"
            "Scramble : 1     Reset : 2     Blank : 3     Play : 4     Solve : 5     Exit : 6\n"
-           "--------------------------------------------------------------------------------\n"
-           "Action : ");
+           "--------------------------------------------------------------------------------\n\n");
 
 }
 
@@ -194,6 +187,7 @@ void display_rubiks(RUBIKS* rubiks) {
 
     int i, j, k;
 
+    printf("=============================\n\n");
     printf("        ");
     for (i=0;i<3;i++) {
         for (j=0;j<3;j++) {
@@ -228,6 +222,137 @@ void display_rubiks(RUBIKS* rubiks) {
 
 
 /*
+ * Function : display_movements
+ * -----------------------------------------------------
+ *
+ * Display all the movements stored while solving cube /
+ * playing rubiks / scrambling.
+ */
+
+
+void display_movements(RUBIKS* rubiks) {
+
+    int i;
+    for (i=0;i<rubiks->move_nbr;i++) {
+        // if we are not at the end && the move is done twice, for ex U2 OR
+        // if we are not at the end && the move is done counterclockwise, for ex U'
+        if (i < rubiks->move_nbr-1 && (rubiks->solve[i+1] == '2' || rubiks->solve[i+1] == '\'')) {
+            printf("%c", rubiks->solve[i]);
+        }
+        else
+            printf("%c ", rubiks->solve[i]);
+    }
+    printf("\n");
+}
+
+
+/*
+ * Function : play_rubiks
+ * ------------------------------------
+ *
+ * Let the user enter manual movements.
+ */
+
+void play_rubiks(RUBIKS* rubiks) {
+
+    char choice[] = "OK";
+
+    // \' is esc char ' isn't interpreted as char identifier
+    printf("Please enter a movement type :\n"
+           "Enter a name face in capital letters,\n"
+           "UP, LT, FT, RT, BK, DN\n"
+           "and {letter}' for counter, ex : U'\n");
+    while(choice[0] != 'G' && choice[1] != 'O') {
+
+        display_rubiks(rubiks);
+        printf("Movement :");
+        scanf("%c, %c\n", choice[0], choice[1]);
+
+        switch (choice[0]) {
+
+            case 'U':
+                if (choice[1] == '\'')
+                    rotate_upC(rubiks);
+                else if (choice[1] == 'P')
+                    rotate_up(rubiks);
+                choice[0] = 'O';      //resetting value
+                choice[1] = 'K';
+                break;
+            case 'L':
+                if (*(choice+1) == '\'')
+                    rotate_leftC(rubiks);
+                else
+                    rotate_left(rubiks);
+                *choice = 'O';
+                *(choice+1) = 'K';
+                break;
+            case 'F':
+                if (*(choice+1) == '\'')
+                    rotate_frontC(rubiks);
+                else
+                    rotate_front(rubiks);
+                *choice = 'O';
+                *(choice+1) = 'K';
+                break;
+            case 'R':
+                if (*(choice+1) == '\'')
+                    rotate_rightC(rubiks);
+                else
+                    rotate_right(rubiks);
+                *choice = 'O';
+                *(choice+1) = 'K';
+                break;
+            case 'B':
+                if (*(choice+1) == '\'')
+                    rotate_backC(rubiks);
+                else
+                    rotate_back(rubiks);
+                *choice = 'O';
+                *(choice+1) = 'K';
+                break;
+            case 'D':
+                if (*(choice+1) == '\'')
+                    rotate_downC(rubiks);
+                else
+                    rotate_down(rubiks);
+                *choice = 'O';
+                *(choice+1) = 'K';
+                break;
+            case 'O':
+                if (*(choice+1) == 'K')
+                    printf("Ending playing with rubiks");
+                    break;
+            default:
+                printf("Please enter a valid option.\n");
+                *choice = 'G';
+                *(choice+1) = 'O';
+        }
+        display_movements(rubiks);
+    }
+}
+
+
+
+/*
+ * Function : blank_rubiks
+ * ------------------------------------
+ *
+ * Fills the cube with Light Gray color
+ */
+
+void blank_rubiks(RUBIKS* rubiks) {
+
+    int i, j, k;
+    for (i=0;i<6;i++) {
+        for (j=0;j<3;j++) {
+            for (k=0;k<3;k++)
+                rubiks->faces[i].grid[j][k] = LG;
+        }
+    }
+}
+
+
+/*
  * Function : free_rubiks
  * ----------------------------
  *
@@ -241,9 +366,9 @@ void free_rubiks(RUBIKS* rubiks) {
 
 
 /*
- * ===========
- * 3 ROTATIONS
- * ===========
+ * =========================
+ * 3 MOVEMENTS && ALGORITHMS
+ * =========================
  */
 
 
@@ -279,6 +404,8 @@ void rotate_face(int rotations, T_SIDE face, RUBIKS* rubiks) {
  *
  * Rotates a face in clockwise direction
  * For counterclockwise movements, this function is called three times.
+ *
+ * Also, removes unnecessary turns in rubiks->move_nbr && rubiks->solve directly.
  */
 
 void rotate_up(RUBIKS* rubiks) {
@@ -287,25 +414,30 @@ void rotate_up(RUBIKS* rubiks) {
 
     T_COLOR tempGrid[4][3]; // 3 sides of square + 1 temp side
 
-    for (i=0;i<3;i++) {
-        for (j=0;j<3;j++)
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++)
             tempGrid[i][j] = rubiks->faces[UP].grid[i][j]; // Store temp grid
         tempGrid[3][i] = rubiks->faces[FRONT].grid[0][i]; // Stores temp FRONT side
     }
 
     // Rotating UP face
-    for (i=0;i<3;i++) {
-        for(j=0;j<3;j++)
-            rubiks->faces[UP].grid[i][j] = tempGrid[2-j][i];
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++)
+            rubiks->faces[UP].grid[i][j] = tempGrid[2 - j][i];
     }
 
-    for (i=0;i<3;i++) {
+    // Rotating sides
+    for (i = 0; i < 3; i++) {
         rubiks->faces[FRONT].grid[0][i] = rubiks->faces[RIGHT].grid[0][i];
         rubiks->faces[RIGHT].grid[0][i] = rubiks->faces[BACK].grid[0][i];
         rubiks->faces[BACK].grid[0][i] = rubiks->faces[LEFT].grid[0][i];
         rubiks->faces[LEFT].grid[0][i] = tempGrid[3][i];
     }
-    // Rotating sides
+
+    //adds 1 to move_nbr && adds letter U (for up)
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'U';
+    simplify_moves(rubiks);
 }
 
 void rotate_upC(RUBIKS* rubiks) {
@@ -313,6 +445,7 @@ void rotate_upC(RUBIKS* rubiks) {
     rotate_up(rubiks);
     rotate_up(rubiks);
     rotate_up(rubiks);
+
 }
 
 void rotate_left(RUBIKS* rubiks) {
@@ -337,6 +470,9 @@ void rotate_left(RUBIKS* rubiks) {
         rubiks->faces[BACK].grid[2 - i][2] = rubiks->faces[DOWN].grid[i][0];
         rubiks->faces[DOWN].grid[i][0] = tempGrid[3][i];
     }
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'L';
+    simplify_moves(rubiks);
 }
 
 void rotate_leftC(RUBIKS* rubiks) {
@@ -369,6 +505,9 @@ void rotate_front(RUBIKS* rubiks) {
         rubiks->faces[RIGHT].grid[i][0] = tempGrid[3][i];
     }
 
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'F';
+    simplify_moves(rubiks);
 }
 
 void rotate_frontC(RUBIKS* rubiks) {
@@ -400,6 +539,11 @@ void rotate_right(RUBIKS* rubiks) {
         rubiks->faces[BACK].grid[2-i][0] = rubiks->faces[UP].grid[i][2];
         rubiks->faces[UP].grid[i][2] = tempGrid[3][i];
     }
+
+
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'R';
+    simplify_moves(rubiks);
 }
 
 void rotate_rightC(RUBIKS* rubiks) {
@@ -432,6 +576,9 @@ void rotate_back(RUBIKS* rubiks) {
         rubiks->faces[LEFT].grid[2-i][0] = tempGrid[3][i];
     }
 
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'B';
+    simplify_moves(rubiks);
 }
 
 void rotate_backC(RUBIKS* rubiks) {
@@ -463,6 +610,10 @@ void rotate_down(RUBIKS* rubiks) {
         rubiks->faces[BACK].grid[2][i] = rubiks->faces[RIGHT].grid[2][i];
         rubiks->faces[RIGHT].grid[2][i] = tempGrid[3][i];
     }
+
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'D';
+    simplify_moves(rubiks);
 }
 
 void rotate_downC(RUBIKS* rubiks) {
@@ -470,6 +621,46 @@ void rotate_downC(RUBIKS* rubiks) {
     rotate_down(rubiks);
     rotate_down(rubiks);
     rotate_down(rubiks);
+}
+
+
+/*
+ * Function : simplify_moves
+ * -----------------------------------------
+ *
+ * Simplifies rubiks->solve after each move.
+ */
+
+void simplify_moves(RUBIKS* rubiks) {
+
+    int i, j;
+
+    //if we do twice the same movement changes letter to '2'
+    if (rubiks->move_nbr > 1 && rubiks->solve[rubiks->move_nbr - 1] == rubiks->solve[rubiks->move_nbr - 2])
+        rubiks->solve[rubiks->move_nbr - 1] = '2';
+
+    /*
+     * if the move number is higher than two and the previous element is a two
+     * and the previous previous element is the same than the last one
+     * ---> If we have U2U
+     * replace by U'.
+     */
+    if (rubiks->move_nbr > 2 && rubiks->solve[rubiks->move_nbr - 2] == '2' &&
+        rubiks->solve[rubiks->move_nbr - 3] == rubiks->solve[rubiks->move_nbr - 1]) {
+        rubiks->move_nbr--;
+        rubiks->solve[rubiks->move_nbr - 1] = '\'';
+    }
+
+    /*
+     * if the move number is higher than two and the previous element is a '
+     * and the previous previous element is the same than the last one
+     * ---> If we have U'U
+     * remove the movement (same as before) by lowering move_nbr.
+     */
+    if (rubiks->move_nbr > 2 && rubiks->solve[rubiks->move_nbr - 2] == '\'' &&
+        rubiks->solve[rubiks->move_nbr - 3] == rubiks->solve[rubiks->move_nbr - 1])
+        rubiks->move_nbr = rubiks->move_nbr - 3;
+
 }
 
 
@@ -589,7 +780,7 @@ void solve_corners(RUBIKS* rubiks) {
 
 /*
  * Function : scramble_rubiks
- * ----------------------
+ * --------------------------------------------------------------
  *
  * Scrambles the rubiks by doing random movements
  * First, rand() selects the face to rotate
@@ -736,59 +927,109 @@ void rotate_rubiks(RUBIKS* rubiks) {
 }
 
 /*
- * ====================
- * 4 SOLVING ALGORITHMS
- * ====================
+ * =========
+ * 4 SOLVING
+ * =========
  */
 
 /*
  * Function : solve_rubiks
  * ------------------------
  *
- * Pretty straight-forward.
+ * Pretty straight-explanatory.
+ * Calls all the functions needed to solve it,
+ * and wait for the user to go forward
  */
 
 void solve_rubiks(RUBIKS* rubiks) {
 
-    display_rubiks(rubiks);
+    int good=0;
 
-    printf("White Cross\n");
-    white_cross(rubiks);
-    display_rubiks(rubiks);
+    printf("\n-----------------------------\n"
+           "===========SOLVE=============\n"
+           "-----------------------------\n\n");
 
-    printf("White Face\n");
-    white_face(rubiks);
-    display_rubiks(rubiks);
+    while (good != 1) {
+        printf("White Cross\n");
+        white_cross(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
+    good=0;
+
+    while (good != 1) {
+        printf("White Face\n");
+        white_face(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
+    good=0;
 
     rotate_rubiks(rubiks);
-    printf("Second Layer\n");
-    second_layer(rubiks);
-    display_rubiks(rubiks);
+    printf("Please rotate the cube upside down.\n");
 
-    printf("Yellow Cross\n");
-    yellow_cross(rubiks);
-    display_rubiks(rubiks);
+    while (good != 1) {
+        printf("Second Layer\n");
+        second_layer(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
+    good=0;
 
-    printf("Perfect Yellow Cross\n");
-    perfect_yellow_cross(rubiks);
-    display_rubiks(rubiks);
+    while (good != 1) {
+        printf("Yellow Cross\n");
+        yellow_cross(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
+    good=0;
 
-    printf("Yellow Corners\n");
-    yellow_corners(rubiks);
-    display_rubiks(rubiks);
+    while (good != 1) {
+        printf("Perfect Yellow Cross\n");
+        perfect_yellow_cross(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
+    good=0;
 
-    printf("done\n");
-    perfect_cube(rubiks);
-    display_rubiks(rubiks);
+    while (good != 1) {
+        printf("Yellow Corners\n");
+        yellow_corners(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
+    good=0;
 
+    while (good != 1) {
+        printf("Finished Cube\n");
+        perfect_cube(rubiks);
+        display_rubiks(rubiks);
+        display_movements(rubiks);
+        printf("Enter 1 when you are set. ");
+        scanf("%d", &good);
+    }
 }
+
 
 /*
  * Function : middle_white
- * ------------------------
+ * --------------------------------------
  *
- * returns : location of middle location
+ * returns : location of UP side location
  * starting from the bottom
+ *
  * type    : T_SIDE
  */
 
@@ -796,19 +1037,23 @@ T_SIDE middle_white(RUBIKS* rubiks) {
 
     int i;
     for (i = 5; i > 0; i--) {
-        if (rubiks->faces[i].grid[0][1] == W || rubiks->faces[i].grid[1][0] == W || rubiks->faces[i].grid[1][2] == W ||
-            rubiks->faces[i].grid[2][1] == W)
+        if (rubiks->faces[i].grid[0][1] == rubiks->faces[UP].grid[1][1]  ||
+        rubiks->faces[i].grid[1][0] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[i].grid[1][2] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[i].grid[2][1] == rubiks->faces[UP].grid[1][1])
             return i;
     }
     return 0;
 }
 
+
 /*
  * Function : corner_white
- * ------------------------
+ * ----------------------------------------
  *
- * returns : location of white corner location
+ * returns : location of UP corner location
  * starting from the bottom
+ *
  * type    : int
  */
 
@@ -816,34 +1061,15 @@ T_SIDE corner_white(RUBIKS* rubiks)  {
 
     int i;
     for (i=5; i > 0;i--)
-        if (rubiks->faces[i].grid[0][0] == W || rubiks->faces[i].grid[0][2] == W || rubiks->faces[i].grid[2][0] == W ||
-            rubiks->faces[i].grid[2][2] == W)
+        if (rubiks->faces[i].grid[0][0] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[i].grid[0][2] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[i].grid[2][0] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[i].grid[2][2] == rubiks->faces[UP].grid[1][1])
             return i;
 
     return 0;
 }
 
-/*
- * Function : crown_sides
- * ------------------------
- *
- * returns : location of crown_sides with 1 matching color
- * starting from the bottom
- * type    : int
- */
-
-T_SIDE crown_sides(RUBIKS* rubiks, T_COLOR color)  {
-
-    int i;
-    for (i = 4 ; i > 0 ; i--) {
-        if (rubiks->faces[i].grid[1][0] == color || rubiks->faces[i].grid[1][2] == color)
-            return i;
-    }
-    if (rubiks->faces[UP].grid[0][0] == color || rubiks->faces[UP].grid[0][2] == color ||
-    rubiks->faces[UP].grid[2][0] == color || rubiks->faces[UP].grid[2][2] == color)
-        return UP;
-    return -1;
-}
 
 /*
  * Function : all_four_white
@@ -855,9 +1081,12 @@ T_SIDE crown_sides(RUBIKS* rubiks, T_COLOR color)  {
  */
 
 int all_four_white(RUBIKS* rubiks) {
-    return (rubiks->faces[0].grid[0][1] == W && rubiks->faces[0].grid[1][0] == W && rubiks->faces[0].grid[1][2] == W &&
-            rubiks->faces[0].grid[2][1] == W);
+    return rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] &&
+           rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1] &&
+           rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1] &&
+           rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1];
 }
+
 
 /*
  * Function : perfect_cross
@@ -869,10 +1098,12 @@ int all_four_white(RUBIKS* rubiks) {
  */
 
 int perfect_cross(RUBIKS* rubiks) {
-    return (all_four_white(rubiks) && rubiks->faces[LEFT].grid[0][1] == O && rubiks->faces[FRONT].grid[0][1] == G &&
-    rubiks->faces[RIGHT].grid[0][1] == R && rubiks->faces[BACK].grid[0][1] == B);
+    return all_four_white(rubiks) &&
+    rubiks->faces[LEFT].grid[0][1] == rubiks->faces[LEFT].grid[1][1] &&
+    rubiks->faces[FRONT].grid[0][1] == rubiks->faces[FRONT].grid[1][1] &&
+    rubiks->faces[RIGHT].grid[0][1] == rubiks->faces[RIGHT].grid[1][1] &&
+    rubiks->faces[BACK].grid[0][1] == rubiks->faces[BACK].grid[1][1];
 }
-
 
 
 /*
@@ -894,38 +1125,38 @@ void white_cross(RUBIKS* rubiks) {
 
         switch(location) {
             case DOWN :
-                while (rubiks->faces[DOWN].grid[1][2] != W) // while it's not in [1][2]
+                while (rubiks->faces[DOWN].grid[1][2] != rubiks->faces[UP].grid[1][1]) // while it's not in [1][2]
                     rotate_down(rubiks);
-                while (rubiks->faces[UP].grid[1][2] == W) // while there is white where u r rotating
+                while (rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1]) // while there is white where u r rotating
                     rotate_up(rubiks);
                 rotate_right(rubiks);        // move face up
                 rotate_right(rubiks);        // to make it up
                 break;
             case BACK :
-                while (rubiks->faces[BACK].grid[1][2] != W)
+                while (rubiks->faces[BACK].grid[1][2] != rubiks->faces[UP].grid[1][1])
                     rotate_back(rubiks);
-                while (rubiks->faces[UP].grid[1][0] == W)
+                while (rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1])
                     rotate_up(rubiks);
                 rotate_left(rubiks);
                 break;
             case RIGHT :
-                while (rubiks->faces[RIGHT].grid[1][2] != W)
+                while (rubiks->faces[RIGHT].grid[1][2] != rubiks->faces[UP].grid[1][1])
                     rotate_right(rubiks);
-                while (rubiks->faces[UP].grid[0][1] == W)
+                while (rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1])
                     rotate_up(rubiks);
                 rotate_back(rubiks);
                 break;
             case FRONT :
-                while (rubiks->faces[FRONT].grid[1][2] != W)
+                while (rubiks->faces[FRONT].grid[1][2] != rubiks->faces[UP].grid[1][1])
                     rotate_front(rubiks);
-                while (rubiks->faces[UP].grid[1][2] == W)
+                while (rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1])
                     rotate_up(rubiks);
                 rotate_right(rubiks);
                 break;
             case LEFT :
-                while (rubiks->faces[LEFT].grid[1][2] != W)
+                while (rubiks->faces[LEFT].grid[1][2] != rubiks->faces[UP].grid[1][1])
                     rotate_left(rubiks);
-                while (rubiks->faces[UP].grid[2][1] == W)
+                while (rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1])
                     rotate_up(rubiks);
                 rotate_front(rubiks);
                 break;
@@ -935,11 +1166,12 @@ void white_cross(RUBIKS* rubiks) {
         location = middle_white(rubiks);
     }
 
-    while (rubiks->faces[FRONT].grid[0][1] != G) // green on top of front face
+    while (rubiks->faces[FRONT].grid[0][1] != rubiks->faces[FRONT].grid[1][1]) // green on top of front face
         rotate_up(rubiks);
 
     while (!(perfect_cross(rubiks))) {
-        if (rubiks->faces[LEFT].grid[0][1] == O && rubiks->faces[BACK].grid[0][1] != B) {
+        if (rubiks->faces[LEFT].grid[0][1] == rubiks->faces[LEFT].grid[1][1] &&
+        rubiks->faces[BACK].grid[0][1] != rubiks->faces[BACK].grid[1][1]) {
             rotate_right(rubiks);
             rotate_up(rubiks);
             rotate_rightC(rubiks);
@@ -947,7 +1179,8 @@ void white_cross(RUBIKS* rubiks) {
             rotate_right(rubiks);
 
         }
-        if (rubiks->faces[RIGHT].grid[0][1] == R && rubiks->faces[BACK].grid[0][1] != B) {
+        if (rubiks->faces[RIGHT].grid[0][1] == rubiks->faces[RIGHT].grid[1][1] &&
+        rubiks->faces[BACK].grid[0][1] != rubiks->faces[BACK].grid[1][1]) {
             rotate_leftC(rubiks);
             rotate_upC(rubiks);
             rotate_left(rubiks);
@@ -955,7 +1188,8 @@ void white_cross(RUBIKS* rubiks) {
             rotate_leftC(rubiks);
 
         }
-        if (rubiks->faces[RIGHT].grid[0][1] != R && rubiks->faces[LEFT].grid[0][1] != O) {
+        if (rubiks->faces[RIGHT].grid[0][1] != rubiks->faces[RIGHT].grid[1][1] &&
+        rubiks->faces[LEFT].grid[0][1] != rubiks->faces[LEFT].grid[1][1]) {
             rotate_right(rubiks);
             rotate_right(rubiks);
             rotate_left(rubiks);
@@ -987,6 +1221,7 @@ void solve_back(RUBIKS* rubiks) {
     rotate_backC(rubiks);
 }
 
+
 /*
  * Function : solve_front
  * ----------------------
@@ -1000,6 +1235,7 @@ void solve_front(RUBIKS* rubiks) {
     rotate_down(rubiks);
     rotate_frontC(rubiks);
 }
+
 
 /*
  * Function : solve_right
@@ -1015,6 +1251,7 @@ void solve_right(RUBIKS* rubiks) {
     rotate_rightC(rubiks);
 }
 
+
 /*
  * Function : solve_left
  * ----------------------
@@ -1028,7 +1265,6 @@ void solve_left(RUBIKS* rubiks) {
     rotate_down(rubiks);
     rotate_leftC(rubiks);
 }
-
 
 
 /*
@@ -1047,32 +1283,35 @@ void white_face(RUBIKS* rubiks) {
     T_SIDE location;
 
     //removing not well placed square from top layer
-    if (rubiks->faces[UP].grid[0][0] == W && (rubiks->faces[LEFT].grid[0][0] != O ||
-                                              rubiks->faces[BACK].grid[0][2] != B)) {
+    if (rubiks->faces[UP].grid[0][0] == rubiks->faces[UP].grid[1][1] &&
+    (rubiks->faces[LEFT].grid[0][0] != rubiks->faces[LEFT].grid[1][1] ||
+    rubiks->faces[BACK].grid[0][2] != rubiks->faces[BACK].grid[1][1])) {
         rotate_leftC(rubiks);
         rotate_downC(rubiks);
         rotate_left(rubiks);
     }
-    if (rubiks->faces[UP].grid[0][2] == W && (rubiks->faces[RIGHT].grid[0][2] != R ||
-                                              rubiks->faces[BACK].grid[0][0] != B)) {
+    if (rubiks->faces[UP].grid[0][2] == rubiks->faces[UP].grid[1][1] &&
+    (rubiks->faces[RIGHT].grid[0][2] != rubiks->faces[RIGHT].grid[1][1] ||
+    rubiks->faces[BACK].grid[0][0] != rubiks->faces[BACK].grid[1][1])) {
         rotate_right(rubiks);
         rotate_downC(rubiks);
         rotate_rightC(rubiks);
-
     }
-    if (rubiks->faces[UP].grid[2][0] == W && (rubiks->faces[LEFT].grid[0][2] != O ||
-                                              rubiks->faces[FRONT].grid[0][0] != G)) {
+    if (rubiks->faces[UP].grid[2][0] == rubiks->faces[UP].grid[1][1] &&
+    (rubiks->faces[LEFT].grid[0][2] != rubiks->faces[LEFT].grid[1][1] ||
+    rubiks->faces[FRONT].grid[0][0] != rubiks->faces[FRONT].grid[1][1])) {
         rotate_left(rubiks);
         rotate_downC(rubiks);
         rotate_leftC(rubiks);
-
     }
-    if (rubiks->faces[UP].grid[2][2] == W && (rubiks->faces[FRONT].grid[0][2] != G ||
-                                              rubiks->faces[RIGHT].grid[0][0] != R)) {
+    if (rubiks->faces[UP].grid[2][2] == rubiks->faces[UP].grid[1][1] &&
+    (rubiks->faces[FRONT].grid[0][2] != rubiks->faces[FRONT].grid[1][1] ||
+    rubiks->faces[RIGHT].grid[0][0] != rubiks->faces[RIGHT].grid[1][1])) {
         rotate_rightC(rubiks);
         rotate_downC(rubiks);
         rotate_right(rubiks);
     }
+
     location = corner_white(rubiks);
 
     while (location) { // while there is still a location
@@ -1082,11 +1321,13 @@ void white_face(RUBIKS* rubiks) {
         switch (location) {
 
             case DOWN :
-                while (rubiks->faces[DOWN].grid[0][0] != W)
+                while (rubiks->faces[DOWN].grid[0][0] != rubiks->faces[UP].grid[1][1])
                     rotate_down(rubiks);
 
-                if ((rubiks->faces[FRONT].grid[2][0] == R && rubiks->faces[LEFT].grid[2][2] == B) ||
-                        (rubiks->faces[FRONT].grid[2][0] == B && rubiks->faces[LEFT].grid[2][2] == R)) {
+                if ((rubiks->faces[FRONT].grid[2][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][2] == rubiks->faces[BACK].grid[1][1]) ||
+                (rubiks->faces[FRONT].grid[2][0] == rubiks->faces[BACK].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][2] == rubiks->faces[LEFT].grid[1][1])) {
                     rotate_down(rubiks);
                     rotate_down(rubiks);
 
@@ -1100,8 +1341,10 @@ void white_face(RUBIKS* rubiks) {
                     rotate_back(rubiks);
                 }
 
-                else if ((rubiks->faces[FRONT].grid[2][0] == G && rubiks->faces[LEFT].grid[2][2] == R) ||
-                    (rubiks->faces[FRONT].grid[2][0] == R && rubiks->faces[LEFT].grid[2][2] == G)) {
+                else if ((rubiks->faces[FRONT].grid[2][0] == rubiks->faces[FRONT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][2] == rubiks->faces[RIGHT].grid[1][1]) ||
+                (rubiks->faces[FRONT].grid[2][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][2] == rubiks->faces[FRONT].grid[1][1])) {
                     rotate_down(rubiks);
 
                     rotate_rightC(rubiks);
@@ -1114,8 +1357,10 @@ void white_face(RUBIKS* rubiks) {
                     rotate_right(rubiks);
                 }
 
-                else if ((rubiks->faces[FRONT].grid[2][0] == B && rubiks->faces[LEFT].grid[2][2] == O) ||
-                    (rubiks->faces[FRONT].grid[2][0] == O && rubiks->faces[LEFT].grid[2][2] == B)) {
+                else if ((rubiks->faces[FRONT].grid[2][0] == rubiks->faces[BACK].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][2] == rubiks->faces[LEFT].grid[1][1]) ||
+                (rubiks->faces[FRONT].grid[2][0] == rubiks->faces[LEFT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][2] == rubiks->faces[BACK].grid[1][1])) {
                     rotate_downC(rubiks);
 
                     rotate_leftC(rubiks);
@@ -1141,20 +1386,20 @@ void white_face(RUBIKS* rubiks) {
                 break;
 
             case BACK :
-                if (rubiks->faces[BACK].grid[2][2] != W) {
-                    if (rubiks->faces[BACK].grid[0][0] == W) {
+                if (rubiks->faces[BACK].grid[2][2] != rubiks->faces[UP].grid[1][1]) {
+                    if (rubiks->faces[BACK].grid[0][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_backC(rubiks);
                         rotate_downC(rubiks);
                         rotate_back(rubiks);
                         rotate_down(rubiks);
                     }//now it's bottom left
-                    if (rubiks->faces[BACK].grid[0][2] == W) {
+                    if (rubiks->faces[BACK].grid[0][2] == rubiks->faces[UP].grid[1][1]) {
                         rotate_back(rubiks);
                         rotate_down(rubiks);
                         rotate_backC(rubiks);
                         rotate_downC(rubiks);
                     }
-                    if (rubiks->faces[BACK].grid[2][0] == W) {
+                    if (rubiks->faces[BACK].grid[2][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_backC(rubiks);
                         rotate_down(rubiks);
                         rotate_back(rubiks);
@@ -1162,21 +1407,27 @@ void white_face(RUBIKS* rubiks) {
                     }
                 } //here we have a white corner on 2 2
 
-                if ((rubiks->faces[DOWN].grid[2][0] == R && rubiks->faces[LEFT].grid[2][0] == B) ||
-                    (rubiks->faces[DOWN].grid[2][0] == B && rubiks->faces[LEFT].grid[2][0] == R)) {
+                if ((rubiks->faces[DOWN].grid[2][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][0] == rubiks->faces[BACK].grid[1][1]) ||
+                (rubiks->faces[DOWN].grid[2][0] == rubiks->faces[BACK].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][0] == rubiks->faces[RIGHT].grid[1][1])) {
                     rotate_downC(rubiks);
                     solve_right(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[2][0] == G && rubiks->faces[LEFT].grid[2][0] == R) ||
-                    (rubiks->faces[DOWN].grid[2][0] == R && rubiks->faces[LEFT].grid[2][0] == G)) {
+                else if ((rubiks->faces[DOWN].grid[2][0] == rubiks->faces[FRONT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][0] == rubiks->faces[RIGHT].grid[1][1]) ||
+                (rubiks->faces[DOWN].grid[2][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][0] == rubiks->faces[FRONT].grid[1][1])) {
                     rotate_down(rubiks);
                     rotate_down(rubiks);
                     solve_front(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[2][0] == G && rubiks->faces[LEFT].grid[2][0] == O) ||
-                    (rubiks->faces[DOWN].grid[2][0] == O && rubiks->faces[LEFT].grid[2][0] == G)) {
+                else if ((rubiks->faces[DOWN].grid[2][0] == rubiks->faces[FRONT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][0] == rubiks->faces[LEFT].grid[1][1]) ||
+                (rubiks->faces[DOWN].grid[2][0] == rubiks->faces[LEFT].grid[1][1] &&
+                rubiks->faces[LEFT].grid[2][0] == rubiks->faces[GREEN].grid[1][1])) {
                     rotate_down(rubiks);
                     solve_left(rubiks);
                 }
@@ -1187,20 +1438,20 @@ void white_face(RUBIKS* rubiks) {
                 break;
 
             case RIGHT :
-                if (rubiks->faces[RIGHT].grid[2][2] != W) {
-                    if (rubiks->faces[RIGHT].grid[0][0] == W) {
+                if (rubiks->faces[RIGHT].grid[2][2] != rubiks->faces[UP].grid[1][1]) {
+                    if (rubiks->faces[RIGHT].grid[0][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_rightC(rubiks);
                         rotate_downC(rubiks);
                         rotate_right(rubiks);
                         rotate_down(rubiks);
                     }
-                    if (rubiks->faces[RIGHT].grid[0][2] == W) {
+                    if (rubiks->faces[RIGHT].grid[0][2] == rubiks->faces[UP].grid[1][1]) {
                         rotate_right(rubiks);
                         rotate_down(rubiks);
                         rotate_rightC(rubiks);
                         rotate_downC(rubiks);
                     }
-                    if (rubiks->faces[RIGHT].grid[2][0] == W) {
+                    if (rubiks->faces[RIGHT].grid[2][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_rightC(rubiks);
                         rotate_down(rubiks);
                         rotate_right(rubiks);
@@ -1208,20 +1459,26 @@ void white_face(RUBIKS* rubiks) {
                     }
                 }
 
-                if ((rubiks->faces[DOWN].grid[2][2] == O && rubiks->faces[BACK].grid[2][0] == B) ||
-                    (rubiks->faces[DOWN].grid[2][2] == B && rubiks->faces[BACK].grid[2][0] == O)) {
+                if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[LEFT].grid[1][1] &&
+                rubiks->faces[BACK].grid[2][0] == rubiks->faces[BACK].grid[1][1]) ||
+                (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[BACK].grid[1][1] &&
+                rubiks->faces[BACK].grid[2][0] == rubiks->faces[LEFT].grid[1][1])) {
                     rotate_down(rubiks);
                     solve_back(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[2][2] == G && rubiks->faces[BACK].grid[2][0] == R) ||
-                    (rubiks->faces[DOWN].grid[2][2] == R && rubiks->faces[BACK].grid[2][0] == G)) {
+                else if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[FRONT].grid[1][1] &&
+                rubiks->faces[BACK].grid[2][0] == rubiks->faces[RIGHT].grid[1][1]) ||
+                (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[RIGHT].grid[1][1] &&
+                rubiks->faces[BACK].grid[2][0] == rubiks->faces[FRONT].grid[1][1])) {
                     rotate_downC(rubiks);
                     solve_front(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[2][2] == G && rubiks->faces[BACK].grid[2][0] == O) ||
-                    (rubiks->faces[DOWN].grid[2][2] == O && rubiks->faces[BACK].grid[2][0] == G)) {
+                else if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[FRONT].grid[1][1] &&
+                rubiks->faces[BACK].grid[2][0] == rubiks->faces[LEFT].grid[1][1]) ||
+                (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[LEFT].grid[1][1] &&
+                rubiks->faces[BACK].grid[2][0] == rubiks->faces[FRONT].grid[1][1])) {
                     rotate_down(rubiks);
                     rotate_down(rubiks);
                     solve_left(rubiks);
@@ -1234,20 +1491,20 @@ void white_face(RUBIKS* rubiks) {
 
             case FRONT :
 
-                if (rubiks->faces[FRONT].grid[2][2] != W) {
-                    if (rubiks->faces[FRONT].grid[0][0] == W) {
+                if (rubiks->faces[FRONT].grid[2][2] != rubiks->faces[UP].grid[1][1]) {
+                    if (rubiks->faces[FRONT].grid[0][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_frontC(rubiks);
                         rotate_downC(rubiks);
                         rotate_front(rubiks);
                         rotate_down(rubiks);
                     }
-                    if (rubiks->faces[FRONT].grid[0][2] == W) {
+                    if (rubiks->faces[FRONT].grid[0][2] == rubiks->faces[UP].grid[1][1]) {
                         rotate_front(rubiks);
                         rotate_down(rubiks);
                         rotate_frontC(rubiks);
                         rotate_downC(rubiks);
                     }
-                    if (rubiks->faces[FRONT].grid[2][0] == W) {
+                    if (rubiks->faces[FRONT].grid[2][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_frontC(rubiks);
                         rotate_down(rubiks);
                         rotate_front(rubiks);
@@ -1255,21 +1512,27 @@ void white_face(RUBIKS* rubiks) {
                     }
                 }
 
-                if ((rubiks->faces[DOWN].grid[0][2] == O && rubiks->faces[RIGHT].grid[2][0] == B) ||
-                    (rubiks->faces[DOWN].grid[0][2] == B && rubiks->faces[RIGHT].grid[2][0] == O)) {
+                if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[LEFT].grid[1][1] &&
+                     rubiks->faces[BACK].grid[2][0] == rubiks->faces[BACK].grid[1][1]) ||
+                    (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[BACK].grid[1][1] &&
+                     rubiks->faces[BACK].grid[2][0] == rubiks->faces[LEFT].grid[1][1])) {
                     rotate_down(rubiks);
                     rotate_down(rubiks);
                     solve_back(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[0][2] == B && rubiks->faces[RIGHT].grid[2][0] == R) ||
-                         (rubiks->faces[DOWN].grid[0][2] == R && rubiks->faces[RIGHT].grid[2][0] == B)) {
+                else if ((rubiks->faces[DOWN].grid[2][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                     rubiks->faces[LEFT].grid[2][0] == rubiks->faces[BACK].grid[1][1]) ||
+                    (rubiks->faces[DOWN].grid[2][0] == rubiks->faces[BACK].grid[1][1] &&
+                     rubiks->faces[LEFT].grid[2][0] == rubiks->faces[RIGHT].grid[1][1])) {
                     rotate_down(rubiks);
                     solve_right(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[0][2] == G && rubiks->faces[RIGHT].grid[2][0] == O) ||
-                         (rubiks->faces[DOWN].grid[0][2] == O && rubiks->faces[RIGHT].grid[2][0] == G)) {
+                else if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[FRONT].grid[1][1] &&
+                          rubiks->faces[BACK].grid[2][0] == rubiks->faces[LEFT].grid[1][1]) ||
+                         (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[LEFT].grid[1][1] &&
+                          rubiks->faces[BACK].grid[2][0] == rubiks->faces[FRONT].grid[1][1])) {
                     rotate_downC(rubiks);
                     solve_left(rubiks);
                 }
@@ -1279,20 +1542,20 @@ void white_face(RUBIKS* rubiks) {
                 break;
 
             case LEFT :
-                if (rubiks->faces[LEFT].grid[2][2] != W) {
-                    if (rubiks->faces[LEFT].grid[0][0] == W) {
+                if (rubiks->faces[LEFT].grid[2][2] != rubiks->faces[UP].grid[1][1]) {
+                    if (rubiks->faces[LEFT].grid[0][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_leftC(rubiks);
                         rotate_downC(rubiks);
                         rotate_left(rubiks);
                         rotate_down(rubiks);
                     }
-                    if (rubiks->faces[LEFT].grid[0][2] == W) {
+                    if (rubiks->faces[LEFT].grid[0][2] == rubiks->faces[UP].grid[1][1]) {
                         rotate_left(rubiks);
                         rotate_down(rubiks);
                         rotate_leftC(rubiks);
                         rotate_downC(rubiks);
                     }
-                    if (rubiks->faces[LEFT].grid[2][0] == W) {
+                    if (rubiks->faces[LEFT].grid[2][0] == rubiks->faces[UP].grid[1][1]) {
                         rotate_leftC(rubiks);
                         rotate_down(rubiks);
                         rotate_left(rubiks);
@@ -1300,21 +1563,27 @@ void white_face(RUBIKS* rubiks) {
                     }
                 }
 
-                if ((rubiks->faces[DOWN].grid[0][0] == O && rubiks->faces[FRONT].grid[2][0] == B) ||
-                    (rubiks->faces[DOWN].grid[0][0] == B && rubiks->faces[FRONT].grid[2][0] == O)) {
+                if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[LEFT].grid[1][1] &&
+                     rubiks->faces[BACK].grid[2][0] == rubiks->faces[BACK].grid[1][1]) ||
+                    (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[BACK].grid[1][1] &&
+                     rubiks->faces[BACK].grid[2][0] == rubiks->faces[LEFT].grid[1][1])) {
                     rotate_downC(rubiks);
                     solve_back(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[0][0] == B && rubiks->faces[FRONT].grid[2][0] == R) ||
-                         (rubiks->faces[DOWN].grid[0][0] == R && rubiks->faces[FRONT].grid[2][0] == B)) {
+                else if ((rubiks->faces[DOWN].grid[2][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                     rubiks->faces[LEFT].grid[2][0] == rubiks->faces[BACK].grid[1][1]) ||
+                    (rubiks->faces[DOWN].grid[2][0] == rubiks->faces[BACK].grid[1][1] &&
+                     rubiks->faces[LEFT].grid[2][0] == rubiks->faces[RIGHT].grid[1][1])) {
                     rotate_down(rubiks);
                     rotate_down(rubiks);
                     solve_right(rubiks);
                 }
 
-                else if ((rubiks->faces[DOWN].grid[0][0] == G && rubiks->faces[FRONT].grid[2][0] == R) ||
-                         (rubiks->faces[DOWN].grid[0][0] == R && rubiks->faces[FRONT].grid[2][0] == G)) {
+                else if ((rubiks->faces[DOWN].grid[2][2] == rubiks->faces[FRONT].grid[1][1] &&
+                          rubiks->faces[BACK].grid[2][0] == rubiks->faces[RIGHT].grid[1][1]) ||
+                         (rubiks->faces[DOWN].grid[2][2] == rubiks->faces[RIGHT].grid[1][1] &&
+                          rubiks->faces[BACK].grid[2][0] == rubiks->faces[FRONT].grid[1][1])) {
                     rotate_down(rubiks);
                     solve_front(rubiks);
                 }
@@ -1330,6 +1599,7 @@ void white_face(RUBIKS* rubiks) {
         location = corner_white(rubiks);
     }
 }
+
 
 /*
  * Function : second_layer
@@ -1354,10 +1624,14 @@ void second_layer(RUBIKS* rubiks) {
              rubiks->faces[LEFT].grid[1][2] == rubiks->faces[LEFT].grid[1][1])) {
         // while the crown isn't finished
 
-        if ((rubiks->faces[UP].grid[0][1] == Y || rubiks->faces[BACK].grid[0][1] == Y) &&
-            (rubiks->faces[UP].grid[1][0] == Y || rubiks->faces[LEFT].grid[0][1] == Y) &&
-            (rubiks->faces[UP].grid[1][2] == Y || rubiks->faces[RIGHT].grid[0][1] == Y) &&
-            (rubiks->faces[UP].grid[2][1] == Y || rubiks->faces[FRONT].grid[0][1] == Y)) {
+        if ((rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[BACK].grid[0][1] == rubiks->faces[UP].grid[1][1]) &&
+            (rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1] ||
+            rubiks->faces[LEFT].grid[0][1] == rubiks->faces[UP].grid[1][1]) &&
+            (rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1] ||
+            rubiks->faces[RIGHT].grid[0][1] == rubiks->faces[UP].grid[1][1]) &&
+            (rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1] ||
+            rubiks->faces[FRONT].grid[0][1] == rubiks->faces[UP].grid[1][1])) {
             //if there are only yellows on top && top sides
 
 
@@ -1374,7 +1648,8 @@ void second_layer(RUBIKS* rubiks) {
         //by the end a good square is running on top
 
 
-        while (rubiks->faces[FRONT].grid[0][1] == Y || rubiks->faces[UP].grid[2][1] == Y)
+        while (rubiks->faces[FRONT].grid[0][1] == rubiks->faces[UP].grid[1][1] ||
+        rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1])
             rotate_rubiks_clockwise(rubiks);
         //while there is not a valid piece to be placed
 
@@ -1388,11 +1663,15 @@ void second_layer(RUBIKS* rubiks) {
         else
             front_l(rubiks);
     }
+
+    //Putting green back front
+    while (rubiks->faces[FRONT].grid[1][1] != G)
+        rotate_rubiks_clockwise(rubiks);
 }
 
 /*
  * Function : yellow_cross
- * -----------------------
+ * --------------------------------------------------
  *
  * Realizes a yellow cross on the top face
  *
@@ -1403,37 +1682,35 @@ void second_layer(RUBIKS* rubiks) {
 
 void yellow_cross(RUBIKS* rubiks) {
 
-    if (!(rubiks->faces[UP].grid[0][1] == Y && rubiks->faces[UP].grid[1][0] == Y &&
-            rubiks->faces[UP].grid[1][2] == Y && rubiks->faces[UP].grid[2][1] == Y)) {
+    if (!(rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] &&
+    rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1] &&
+            rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1] &&
+            rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1])) {
 
         // Step1 : Nothing
-        if (rubiks->faces[UP].grid[0][1] != Y && rubiks->faces[UP].grid[1][0] != Y &&
-            rubiks->faces[UP].grid[1][2] != Y && rubiks->faces[UP].grid[2][1] != Y)
+        if (rubiks->faces[UP].grid[0][1] != rubiks->faces[UP].grid[1][1] &&
+        rubiks->faces[UP].grid[1][0] != rubiks->faces[UP].grid[1][1] &&
+            rubiks->faces[UP].grid[1][2] != rubiks->faces[UP].grid[1][1] &&
+            rubiks->faces[UP].grid[2][1] != rubiks->faces[UP].grid[1][1])
             //if there are no blue faces
             solve_ycross(rubiks);
 
         // Step2 : L
-        if (!((rubiks->faces[UP].grid[0][1] == Y && rubiks->faces[UP].grid[2][1] == Y) ||
-                ((rubiks->faces[UP].grid[1][0] == Y && rubiks->faces[UP].grid[1][2] == Y)))) {
+        if (!((rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1]) ||
+                ((rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1])))) {
                 //if we have a yellow L
-            while (!(rubiks->faces[UP].grid[0][1] == Y && rubiks->faces[UP].grid[1][0] == Y))
+            while (!(rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1]))
                 rotate_up(rubiks);
             solve_ycross(rubiks);
         }
         // Step3 : Bar
-        if (rubiks->faces[UP].grid[0][1] == Y && rubiks->faces[UP].grid[2][1] == Y)
+        if (rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1])
             // if the bar is vertical
             rotate_up(rubiks);
         solve_ycross(rubiks);
     }
 }
-int is_cross_line(RUBIKS* rubiks) {
-    //todo
-    //returns if we are in a good position to algorithm :
-    // if there is a line unfinished, right and left
-    // if there is a L unfinished, front and left.
-    return (1);
-}
+
 
 void perfect_yellow_cross(RUBIKS* rubiks) {
 
