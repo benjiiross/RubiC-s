@@ -26,8 +26,8 @@
  * check .h
  * main                          done ? parler du blank
  * put rubiks back on top
- * flush movements
- * insert rotate cube
+ * flush movements               NO
+ * insert rotate cube ?
  * play_rubiks
  * simplify the equations ? ->
  *
@@ -168,9 +168,9 @@ void init_rubiks(RUBIKS* rubiks) {
 
 void disp_main(RUBIKS* rubiks) {
 
-    printf("--------------------------------------------------------------------------------\n"
-           "Scramble : 1     Reset : 2     Blank : 3     Play : 4     Solve : 5     Exit : 6\n"
-           "--------------------------------------------------------------------------------\n\n");
+    printf("---------------------------------------------------------------------------------------------\n"
+           "Scramble : 1     Reset : 2     Blank : 3     Play : 4     Fill : 5     Solve : 6     Exit : 7\n"
+           "---------------------------------------------------------------------------------------------\n\n");
 
 }
 
@@ -1392,7 +1392,7 @@ void white_face(RUBIKS* rubiks) {
                         rotate_downC(rubiks);
                         rotate_back(rubiks);
                         rotate_down(rubiks);
-                    }//now it's bottom left
+                    }//now it's bottom left so 2 0, not in 2 2
                     if (rubiks->faces[BACK].grid[0][2] == rubiks->faces[UP].grid[1][1]) {
                         rotate_back(rubiks);
                         rotate_down(rubiks);
@@ -1658,7 +1658,7 @@ void second_layer(RUBIKS* rubiks) {
             rotate_upC(rubiks);
             rotate_rubiks_clockwise(rubiks);
         }
-        if (rubiks->faces[UP].grid[2][1] == (rubiks->faces[RIGHT].grid[1][1]))
+        if (rubiks->faces[UP].grid[2][1] == rubiks->faces[RIGHT].grid[1][1])
             front_r(rubiks);
         else
             front_l(rubiks);
@@ -1668,6 +1668,7 @@ void second_layer(RUBIKS* rubiks) {
     while (rubiks->faces[FRONT].grid[1][1] != G)
         rotate_rubiks_clockwise(rubiks);
 }
+
 
 /*
  * Function : yellow_cross
@@ -1698,7 +1699,7 @@ void yellow_cross(RUBIKS* rubiks) {
         // Step2 : L
         if (!((rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[2][1] == rubiks->faces[UP].grid[1][1]) ||
                 ((rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[1][2] == rubiks->faces[UP].grid[1][1])))) {
-                //if we have a yellow L
+                //if we have a yellow L, then we want it top left
             while (!(rubiks->faces[UP].grid[0][1] == rubiks->faces[UP].grid[1][1] && rubiks->faces[UP].grid[1][0] == rubiks->faces[UP].grid[1][1]))
                 rotate_up(rubiks);
             solve_ycross(rubiks);
@@ -1711,6 +1712,17 @@ void yellow_cross(RUBIKS* rubiks) {
     }
 }
 
+
+/*
+ * Function : perfect_yellow_cross
+ * --------------------------------------------------
+ *
+ * Solves the perfect yellow cross
+ *
+ *
+ * We look for every side, then solve it accordingly.
+ *
+ */
 
 void perfect_yellow_cross(RUBIKS* rubiks) {
 
