@@ -23,17 +23,6 @@
 
 /* TODO
  * check .h
- * put rubiks back on top
- * flush movements               NO
- * insert rotate cube ?
- * play_rubiks
- * simplify the equations ? ->
- *
- *
- * create fct that checks if rubiks is solvable :
- * computer speedrun
- * if return 1 -> change void to int && return 0
- * says is not possible
  */
 
 
@@ -378,8 +367,8 @@ void play_rubiks(RUBIKS* rubiks) {
 
         printf("Please enter a movement type :\n"
                "Enter a name face in capital letters,\n"
-               "UP, LT, FT, RT, BK, DN and {letter}' for counter, ex : U'\n"
-               "Enter RR for rotate right the entire rubiks and RU for rotate up the rubiks.\n");
+               "UP, LT, FT, RT, BK, DN and {face}' for counter, ex : U'\n"
+               "Enter RR for rotate right the entire rubiks and RU for rotate up the rubiks, GO to leave\n");
         display_rubiks(rubiks);
         printf("Movement :");
         scanf("%s", choice);
@@ -438,15 +427,16 @@ void play_rubiks(RUBIKS* rubiks) {
                 *choice = 'O';
                 *(choice+1) = 'K';
                 break;
-            case 'O':
-                if (*(choice+1) == 'K')
-                    printf("Ending playing with rubiks");
+            case 'G':
+                if (*(choice+1) == 'O')
+                    printf("Ending playing with rubiks\n");
                     break;
             default:
                 printf("Please enter a valid option.\n");
-                *choice = 'G';
-                *(choice+1) = 'O';
+                *choice = 'O';
+                *(choice+1) = 'K';
         }
+        printf("Moves played : ");
         simplify_moves(rubiks);
         display_movements(rubiks);
 
@@ -754,8 +744,6 @@ void rotate_downC(RUBIKS* rubiks) {
  */
 
 void simplify_moves(RUBIKS* rubiks) {
-
-    int i, j;
 
     //if we do twice the same movement changes letter to '2'
     if (rubiks->move_nbr > 1 && (rubiks->solve[rubiks->move_nbr - 1] == rubiks->solve[rubiks->move_nbr - 2]))
@@ -1139,7 +1127,7 @@ void solve_rubiks(RUBIKS* rubiks) {
         scanf("%d", &good);
 
     }
-
+    good=0;
     while (good != 1) {
         printf("White Cross\n");
         white_cross(rubiks);
@@ -2161,36 +2149,4 @@ int perfect_cube(RUBIKS* rubiks) {
     if (cpt==1000)
         return 1;
     return 0;
-}
-
-
-void test_movements(RUBIKS* rubiks) {
-
-    display_rubiks(rubiks);
-
-    rotate_up(rubiks);
-    display_rubiks(rubiks);
-    getchar();
-
-    rotate_left(rubiks);
-    display_rubiks(rubiks);
-    getchar();
-
-    rotate_front(rubiks);
-    display_rubiks(rubiks);
-    getchar();
-
-    rotate_right(rubiks);
-    display_rubiks(rubiks);
-    getchar();
-
-    rotate_back(rubiks);
-    display_rubiks(rubiks);
-    getchar();
-
-    rotate_down(rubiks);
-    display_rubiks(rubiks);
-    getchar();
-
-
 }
