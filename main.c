@@ -40,7 +40,7 @@
 
 int main() {
     RUBIKS *rubiks;
-    int choice, i, j, k;
+    int choice=0, i, j, k;
     srand(time(NULL)); // initializes time for random scramble movements
 
     rubiks = create_rubiks(); // malloc
@@ -69,7 +69,7 @@ int main() {
                     for(i=0;i<3;i++) {
                         for (j=0;j<3;j++) {
                             if (rubiks->faces[k].grid[i][j] == LG) {
-                                printf("Cannot scramble an empty rubiks.");
+                                printf("Cannot scramble a rubiks with empty squares.");
                                 goto start; //leaves the scrambling and goes to start
                             }
                         }
@@ -91,12 +91,17 @@ int main() {
                 fill_rubiks(rubiks);
                 break;
             case 6 :
-                if (rubiks->faces[UP].grid[0][0] == LG) {
-                    printf("Cannot solve an empty rubiks.");
-                    goto start;
+                for (k=0;k<6;k++) {
+                    for(i=0;i<3;i++) {
+                        for (j=0;j<3;j++) {
+                            if (rubiks->faces[k].grid[i][j] == LG) {
+                                printf("Cannot solve a rubiks with empty squares.");
+                                goto start; //leaves the scrambling and goes to start
+                            }
+                        }
+                    }
                 }
-                else
-                    choice_solve(rubiks);
+                choice_solve(rubiks);
                 break;
             case 7 :
                 printf("Thank you for playing our game !\n");

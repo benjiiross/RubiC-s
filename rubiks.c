@@ -21,10 +21,6 @@
  *   4   Solving
  */
 
-/* TODO
- * check .h
- */
-
 
 
 /*
@@ -211,10 +207,10 @@ void display_movements(RUBIKS* rubiks) {
     for (i=0;i<rubiks->move_nbr;i++) {
         // if we are not at the end && the move is done twice, for ex U2 OR
         // if we are not at the end && the move is done counterclockwise, for ex U'
-        if (i < rubiks->move_nbr-1 && (rubiks->solve[i+1] == '2' || rubiks->solve[i+1] == '\''))
-            printf("%c", rubiks->solve[i]);
-        else if (i < rubiks->move_nbr-1 && rubiks->solve[i] == 'A')
+        if (i < rubiks->move_nbr-1 && rubiks->solve[i] == 'A')
             printf("\n");
+        else if (i < rubiks->move_nbr-1 && (rubiks->solve[i+1] == '2' || rubiks->solve[i+1] == '\''))
+            printf("%c", rubiks->solve[i]);
 
         else
             printf("%c ", rubiks->solve[i]);
@@ -223,6 +219,7 @@ void display_movements(RUBIKS* rubiks) {
     //adds backslash for better readability
     rubiks->move_nbr++;
     rubiks->solve[rubiks->move_nbr-1] = 'A';
+    printf("\n");
 }
 
 /*
@@ -243,8 +240,7 @@ void fill_rubiks(RUBIKS* rubiks) {
     RUBIKS* tempRubiks; // creating temp rubiks to check if solution is possible
     int solvable=0, i, j, k;
 
-    while (!(solvable)) {
-        while ((replace[0] != 'Q' && replace[1] != 'U' && replace[2] != 'I' && replace[3] != 'T') || solve_fast(tempRubiks)) {
+        while ((replace[0] != 'Q' && replace[1] != 'U' && replace[2] != 'I' && replace[3] != 'T') || !solvable) {
             start:  //goto location
             printf("Please enter a face name, a location and a color to replace.\n"
                    "Ex : \'U21R\' will replace up face bottom center color to red.\n"
@@ -305,7 +301,7 @@ void fill_rubiks(RUBIKS* rubiks) {
 
                 // subtracts number from '0' to convert char to int
                 rubiks->faces[side].grid[(int) (replace[1] - '0')][(int) (replace[2] - '0')] = color;
-                goto start;
+                goto start; //not well coded but needed to not try to solve rubiks
             }
             else if (replace[0] == 'Q' && replace[1] == 'U' && replace[2] == 'I' && replace[3] == 'T') {
 
@@ -314,7 +310,7 @@ void fill_rubiks(RUBIKS* rubiks) {
                         for (j=0;j<3;j++) {
                             if (rubiks->faces[k].grid[i][j] == LG) {
                                 printf("You cannot exit with an empty square.\n");
-                                goto start;
+                                goto start; //not well coded but needed to not try to solve rubiks
                             }
                         }
                     }
@@ -328,10 +324,10 @@ void fill_rubiks(RUBIKS* rubiks) {
                             tempRubiks->faces[k].grid[i][j] = rubiks->faces[k].grid[i][j]; // stores temp rubiks
                     }
                 }
-                if (solve_fast(tempRubiks))
+                solvable = !(solve_fast(tempRubiks));
+                if (!solvable)
                     printf("\nUnsolvable rubiks ! Please enter a valid option.\n");
                 else {
-                    solvable = 1;
                     printf("Returning to main program...\n");
                 }
             }
@@ -345,10 +341,6 @@ void fill_rubiks(RUBIKS* rubiks) {
             }
 
         }
-
-
-
-    }
     free(tempRubiks);
 }
 
@@ -365,8 +357,7 @@ void play_rubiks(RUBIKS* rubiks) {
 
     while(*(choice) != 'G' && *(choice+1) != 'O') {
 
-        printf("Please enter a movement type :\n"
-               "Enter a name face in capital letters,\n"
+        printf("Enter a name face in capital letters,\n"
                "UP, LT, FT, RT, BK, DN and {face}' for counter, ex : U'\n"
                "Enter RR for rotate right the entire rubiks and RU for rotate up the rubiks, GO to leave\n");
         display_rubiks(rubiks);
@@ -376,69 +367,140 @@ void play_rubiks(RUBIKS* rubiks) {
         switch (*choice) {
 
             case 'U':
-                if (*(choice+1) == '\'')
+                if (*(choice+1) == '\'') {
                     rotate_upC(rubiks);
-                else if (choice[1] == 'P')
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (choice[1] == 'P') {
                     rotate_up(rubiks);
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else
+                    printf("Please enter a valid option.\n");
                 *choice = 'O';      //resetting value
                 *(choice+1) = 'K';
                 break;
             case 'L':
-                if (*(choice+1) == '\'')
+                if (*(choice+1) == '\'') {
                     rotate_leftC(rubiks);
-                else
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'T') {
                     rotate_left(rubiks);
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else
+                    printf("Please enter a valid option.\n");
                 *choice = 'O';
                 *(choice+1) = 'K';
                 break;
             case 'F':
-                if (*(choice+1) == '\'')
+                if (*(choice+1) == '\'') {
                     rotate_frontC(rubiks);
-                else
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'T') {
                     rotate_front(rubiks);
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else
+                    printf("Please enter a valid option.\n");
                 *choice = 'O';
                 *(choice+1) = 'K';
                 break;
             case 'R':
-                if (*(choice+1) == '\'')
+                if (*(choice+1) == '\'') {
                     rotate_rightC(rubiks);
-                else if (*(choice+1) == 'R')
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'R') {
                     rotate_rubiks_clockwise(rubiks);
-                else if (*(choice+1) == 'U')
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'U') {
                     rotate_rubiks(rubiks);
-                else
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'T') {
                     rotate_right(rubiks);
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else
+                    printf("Please enter a valid option.\n");
                 *choice = 'O';
                 *(choice+1) = 'K';
                 break;
             case 'B':
-                if (*(choice+1) == '\'')
+                if (*(choice+1) == '\'') {
                     rotate_backC(rubiks);
-                else
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'K') {
                     rotate_back(rubiks);
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else
+                    printf("Please enter a valid option.\n");
                 *choice = 'O';
                 *(choice+1) = 'K';
                 break;
             case 'D':
-                if (*(choice+1) == '\'')
+                if (*(choice+1) == '\'') {
                     rotate_downC(rubiks);
-                else
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else if (*(choice+1) == 'N') {
                     rotate_down(rubiks);
+                    printf("Moves played : ");
+                    simplify_moves(rubiks);
+                    display_movements(rubiks);
+                }
+                else
+                    printf("Please enter a valid option.\n");
                 *choice = 'O';
                 *(choice+1) = 'K';
                 break;
             case 'G':
-                if (*(choice+1) == 'O')
+                if (*(choice+1) == 'O') {
                     printf("Ending playing with rubiks\n");
                     break;
+                }
+                else {
+                    printf("Please enter a valid option.\n");
+                *choice = 'O';
+                *(choice+1) = 'K';
+                }
             default:
                 printf("Please enter a valid option.\n");
                 *choice = 'O';
                 *(choice+1) = 'K';
         }
-        printf("Moves played : ");
-        simplify_moves(rubiks);
-        display_movements(rubiks);
 
     }
 }
@@ -746,7 +808,8 @@ void rotate_downC(RUBIKS* rubiks) {
 void simplify_moves(RUBIKS* rubiks) {
 
     //if we do twice the same movement changes letter to '2'
-    if (rubiks->move_nbr > 1 && (rubiks->solve[rubiks->move_nbr - 1] == rubiks->solve[rubiks->move_nbr - 2]))
+    if ((rubiks->move_nbr > 1 && (rubiks->solve[rubiks->move_nbr - 1] == rubiks->solve[rubiks->move_nbr - 2]) &&
+    rubiks->solve[rubiks->move_nbr-1] != 'A'))
         rubiks->solve[rubiks->move_nbr - 1] = '2';
 
     /*
@@ -756,7 +819,8 @@ void simplify_moves(RUBIKS* rubiks) {
      * replace by U'.
      */
     if (rubiks->move_nbr > 2 && rubiks->solve[rubiks->move_nbr - 2] == '2' &&
-        rubiks->solve[rubiks->move_nbr - 3] == rubiks->solve[rubiks->move_nbr - 1]) {
+        rubiks->solve[rubiks->move_nbr - 3] == rubiks->solve[rubiks->move_nbr - 1] &&
+        rubiks->solve[rubiks->move_nbr-1] != 'A') {
         rubiks->move_nbr--;
         rubiks->solve[rubiks->move_nbr - 1] = '\'';
     }
@@ -1050,6 +1114,8 @@ void rotate_rubiks(RUBIKS* rubiks) {
         }
     }
 
+    rubiks->move_nbr++;
+    rubiks->solve[rubiks->move_nbr-1] = 'p';
 }
 
 /*
@@ -1069,18 +1135,50 @@ void rotate_rubiks(RUBIKS* rubiks) {
 
 void choice_solve(RUBIKS* rubiks) {
 
-    int choice=0;
-    printf("Please choose between step-by-step (1) or speedrun mode.(2) ");
+    int choice=0, i, j, k;
+    RUBIKS* tempRubiks;
 
-    while(choice != 1 && choice != 2) {
-        scanf("%d", &choice);
-        if (choice == 1)
-            solve_rubiks(rubiks);
-        else if (choice == 2)
-            speedrun_rubiks(rubiks);
-        else
-            printf("Please choose between 1 and 2. ");
+    //resets green face to front and white face to up
+    while (rubiks->faces[UP].grid[1][1] != W && rubiks->faces[UP].grid[1][1] != G)
+        rotate_rubiks(rubiks);
+
+    if (rubiks->faces[UP].grid[1][1] == W ) {
+        while (rubiks->faces[FRONT].grid[1][1] != G)
+            rotate_rubiks_clockwise(rubiks);
     }
+    else {
+        while (rubiks->faces[FRONT].grid[1][1] != W)
+            rotate_rubiks_clockwise(rubiks);
+        rotate_rubiks(rubiks);
+        rotate_rubiks_clockwise(rubiks);
+        rotate_rubiks_clockwise(rubiks);
+    }
+
+    tempRubiks = (RUBIKS*)malloc(sizeof(RUBIKS));
+    tempRubiks->move_nbr=0;
+    for (k = 0; k < 6; k++) {
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 3; j++)
+                tempRubiks->faces[k].grid[i][j] = rubiks->faces[k].grid[i][j]; // stores temp rubiks
+        }
+    }
+
+    if (!(solve_fast(tempRubiks))) {
+
+        printf("Please choose between step-by-step (1) or speedrun mode.(2) ");
+        while (choice != 1 && choice != 2) {
+            scanf("%d", &choice);
+            if (choice == 1)
+                solve_rubiks(rubiks);
+            else if (choice == 2)
+                speedrun_rubiks(rubiks);
+            else
+                printf("Please choose between 1 and 2. ");
+        }
+    }
+    else
+        printf("The rubiks is not solvable ! Please enter a new combination.");
+    free(tempRubiks);
 }
 
 
@@ -1104,22 +1202,6 @@ void solve_rubiks(RUBIKS* rubiks) {
            "-----------------------------\n\n");
 
 
-    while (rubiks->faces[UP].grid[1][1] != W && rubiks->faces[UP].grid[1][1] != G) {
-        rotate_rubiks(rubiks);
-        printf("?");
-    }
-
-    if (rubiks->faces[UP].grid[1][1] == W ) {
-        while (rubiks->faces[FRONT].grid[1][1] != G)
-            rotate_rubiks_clockwise(rubiks);
-    }
-    else {
-        while (rubiks->faces[FRONT].grid[1][1] != W)
-            rotate_rubiks_clockwise(rubiks);
-        rotate_rubiks(rubiks);
-        rotate_rubiks_clockwise(rubiks);
-        rotate_rubiks_clockwise(rubiks);
-    }
 
     while (good != 1) {
         printf("Please put the green face in front of you and the white face on top.\n"
@@ -1225,7 +1307,6 @@ int solve_fast(RUBIKS* rubiks) {
 
 void speedrun_rubiks(RUBIKS* rubiks) {
 
-    display_movements(rubiks);
     int good=0;
     clock_t start, stopC, stopP;
     do {
@@ -1234,15 +1315,18 @@ void speedrun_rubiks(RUBIKS* rubiks) {
         scanf("%d", &good);
     }
     while (good != 1);
+
     start=clock();
     solve_fast(rubiks);
     stopC = clock();
-    c_getch();
 
+    c_getch();
     stopP = clock();
     printf("It took me %f milliseconds to finish the cube :)\n"
-           "It took you %f seconds.", (double)(stopC-start)/(double)CLOCKS_PER_SEC*1000,
+           "It took you %f seconds.\n", (double)(stopC-start)/(double)CLOCKS_PER_SEC*1000,
            (double)(stopP-start)/(double)CLOCKS_PER_SEC);
+
+    display_movements(rubiks);
 }
 
 /*
@@ -1431,7 +1515,7 @@ int white_cross(RUBIKS* rubiks) {
             }
             cpt++;
         }
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }
@@ -1800,7 +1884,7 @@ int white_face(RUBIKS* rubiks) {
         location = corner_white(rubiks);
         cpt++;
     }
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }
@@ -1887,7 +1971,7 @@ int second_layer(RUBIKS* rubiks) {
         cpt++;
     }
 
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }
@@ -1943,7 +2027,7 @@ int yellow_cross(RUBIKS* rubiks) {
         cpt++;
     }
 
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }
@@ -2002,7 +2086,7 @@ int perfect_yellow_cross(RUBIKS* rubiks) {
         cpt++;
     }
 
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }
@@ -2107,11 +2191,35 @@ int yellow_corners(RUBIKS* rubiks) {
     }
 
 
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }
 
+
+/*
+ * Function : solved_rubiks
+ * ---------------------------------
+ *
+ * Checks if rubiks is fully solved.
+ *
+ */
+
+
+int solved_rubiks(RUBIKS* rubiks) {
+
+    int i, j, k;
+    for (k=0;k<6;k++) {
+        for (i=0;i<3;i++) {
+            for (j=0;j<3;j++) {
+                if (rubiks->faces[k].grid[i][j] != rubiks->faces[k].grid[1][1])
+                    return 0;
+            }
+        }
+    }
+
+    return 1;
+}
 
 /*
  * Function : perfect_cube
@@ -2123,30 +2231,39 @@ int yellow_corners(RUBIKS* rubiks) {
 
 int perfect_cube(RUBIKS* rubiks) {
 
-    int cpt=0;
-    while (!(rubiks->faces[UP].grid[0][0] == rubiks->faces[UP].grid[1][1] &&
-            rubiks->faces[UP].grid[0][2] == rubiks->faces[UP].grid[1][1] &&
-            rubiks->faces[UP].grid[2][0] == rubiks->faces[UP].grid[1][1] &&
-            rubiks->faces[UP].grid[2][2] == rubiks->faces[UP].grid[1][1]) && cpt<1000) {
+    int cpt = 0;
+    while (!(solved_rubiks(rubiks))) {
+        while (!(rubiks->faces[UP].grid[0][0] == rubiks->faces[UP].grid[1][1] &&
+                 rubiks->faces[UP].grid[0][2] == rubiks->faces[UP].grid[1][1] &&
+                 rubiks->faces[UP].grid[2][0] == rubiks->faces[UP].grid[1][1] &&
+                 rubiks->faces[UP].grid[2][2] == rubiks->faces[UP].grid[1][1] &&
+                 rubiks->faces[LEFT].grid[0][0] == rubiks->faces[LEFT].grid[1][1] &&
+                 rubiks->faces[LEFT].grid[0][2] == rubiks->faces[LEFT].grid[1][1] &&
+                 rubiks->faces[FRONT].grid[0][0] == rubiks->faces[FRONT].grid[1][1] &&
+                 rubiks->faces[FRONT].grid[0][2] == rubiks->faces[FRONT].grid[1][1] &&
+                 rubiks->faces[RIGHT].grid[0][0] == rubiks->faces[RIGHT].grid[1][1] &&
+                 rubiks->faces[RIGHT].grid[0][2] == rubiks->faces[RIGHT].grid[1][1] &&
+                 rubiks->faces[BACK].grid[0][0] == rubiks->faces[BACK].grid[1][1] &&
+                 rubiks->faces[BACK].grid[0][2] == rubiks->faces[BACK].grid[1][1]) && cpt < 1000) {
 
-        while (rubiks->faces[UP].grid[2][2] != rubiks->faces[UP].grid[1][1] && cpt<1000) {
-            rotate_rightC(rubiks);
-            rotate_downC(rubiks);
-            rotate_right(rubiks);
-            rotate_down(rubiks);
+            while (rubiks->faces[UP].grid[2][2] != rubiks->faces[UP].grid[1][1] && cpt < 1000) {
+                rotate_rightC(rubiks);
+                rotate_downC(rubiks);
+                rotate_right(rubiks);
+                rotate_down(rubiks);
+                cpt++;
+            }
+            rotate_up(rubiks);
             cpt++;
         }
-        rotate_up(rubiks);
-    }
 
-    while (rubiks->faces[FRONT].grid[0][0] != rubiks->faces[FRONT].grid[1][1] && cpt<1000) {
-        rotate_up(rubiks);
+        while (rubiks->faces[FRONT].grid[0][0] != rubiks->faces[FRONT].grid[1][1] && cpt < 1000) {
+            rotate_up(rubiks);
+            cpt++;
+        }
         cpt++;
     }
-    cpt++;
-
-
-    if (cpt==1000)
+    if (cpt>=1000)
         return 1;
     return 0;
 }

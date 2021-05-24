@@ -143,4 +143,5 @@ int yellow_cross(RUBIKS*);
 int perfect_yellow_cross(RUBIKS*);
 int corner_spot(RUBIKS*);
 int yellow_corners(RUBIKS*);
+int solved_rubiks(RUBIKS*);
 int perfect_cube(RUBIKS*);
