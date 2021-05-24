@@ -48,21 +48,6 @@ int main() {
 
     while (choice != 7) {
         //resetting rubiks front position
-        while (rubiks->faces[UP].grid[1][1] != W || rubiks->faces[UP].grid[1][1] != G) {
-            rotate_rubiks(rubiks);
-        }
-
-        if (rubiks->faces[UP].grid[1][1] != W ) {
-            while (rubiks->faces[FRONT].grid[1][1] != G)
-                rotate_rubiks_clockwise(rubiks);
-        }
-        else {
-            while (rubiks->faces[FRONT].grid[1][1] != W)
-                rotate_rubiks_clockwise(rubiks);
-            rotate_rubiks(rubiks);
-            rotate_rubiks_clockwise(rubiks);
-            rotate_rubiks_clockwise(rubiks);
-        }
 
         //goto location
         start:

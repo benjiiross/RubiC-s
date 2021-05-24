@@ -378,8 +378,8 @@ void play_rubiks(RUBIKS* rubiks) {
 
         printf("Please enter a movement type :\n"
                "Enter a name face in capital letters,\n"
-               "UP, LT, FT, RT, BK, DN\n"
-               "and {letter}' for counter, ex : U'\n");
+               "UP, LT, FT, RT, BK, DN and {letter}' for counter, ex : U'\n"
+               "Enter RR for rotate right the entire rubiks and RU for rotate up the rubiks.\n");
         display_rubiks(rubiks);
         printf("Movement :");
         scanf("%s", choice);
@@ -413,6 +413,10 @@ void play_rubiks(RUBIKS* rubiks) {
             case 'R':
                 if (*(choice+1) == '\'')
                     rotate_rightC(rubiks);
+                else if (*(choice+1) == 'R')
+                    rotate_rubiks_clockwise(rubiks);
+                else if (*(choice+1) == 'U')
+                    rotate_rubiks(rubiks);
                 else
                     rotate_right(rubiks);
                 *choice = 'O';
@@ -443,7 +447,9 @@ void play_rubiks(RUBIKS* rubiks) {
                 *choice = 'G';
                 *(choice+1) = 'O';
         }
+        simplify_moves(rubiks);
         display_movements(rubiks);
+
     }
 }
 
@@ -752,7 +758,7 @@ void simplify_moves(RUBIKS* rubiks) {
     int i, j;
 
     //if we do twice the same movement changes letter to '2'
-    if (rubiks->move_nbr > 1 && rubiks->solve[rubiks->move_nbr - 1] == rubiks->solve[rubiks->move_nbr - 2])
+    if (rubiks->move_nbr > 1 && (rubiks->solve[rubiks->move_nbr - 1] == rubiks->solve[rubiks->move_nbr - 2]))
         rubiks->solve[rubiks->move_nbr - 1] = '2';
 
     /*
@@ -1076,7 +1082,7 @@ void rotate_rubiks(RUBIKS* rubiks) {
 void choice_solve(RUBIKS* rubiks) {
 
     int choice=0;
-    printf("Please choose between step-by-step (1) or speedrun mode. (2)");
+    printf("Please choose between step-by-step (1) or speedrun mode.(2) ");
 
     while(choice != 1 && choice != 2) {
         scanf("%d", &choice);
@@ -1085,7 +1091,7 @@ void choice_solve(RUBIKS* rubiks) {
         else if (choice == 2)
             speedrun_rubiks(rubiks);
         else
-            printf("Please choose between 1 and 2.");
+            printf("Please choose between 1 and 2. ");
     }
 }
 
@@ -1108,6 +1114,31 @@ void solve_rubiks(RUBIKS* rubiks) {
     printf("\n-----------------------------\n"
            "===========SOLVE=============\n"
            "-----------------------------\n\n");
+
+
+    while (rubiks->faces[UP].grid[1][1] != W && rubiks->faces[UP].grid[1][1] != G) {
+        rotate_rubiks(rubiks);
+        printf("?");
+    }
+
+    if (rubiks->faces[UP].grid[1][1] == W ) {
+        while (rubiks->faces[FRONT].grid[1][1] != G)
+            rotate_rubiks_clockwise(rubiks);
+    }
+    else {
+        while (rubiks->faces[FRONT].grid[1][1] != W)
+            rotate_rubiks_clockwise(rubiks);
+        rotate_rubiks(rubiks);
+        rotate_rubiks_clockwise(rubiks);
+        rotate_rubiks_clockwise(rubiks);
+    }
+
+    while (good != 1) {
+        printf("Please put the green face in front of you and the white face on top.\n"
+                "Enter 1 when you are good.");
+        scanf("%d", &good);
+
+    }
 
     while (good != 1) {
         printf("White Cross\n");
