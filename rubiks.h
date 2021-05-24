@@ -29,21 +29,21 @@
  * =====================
  */
 
-typedef enum {W, O, G, R, B, Y, LG} T_COLOR;
 // Creates the enumerated type T_COLOR.
 // Stored in rubiks.faces[face].grid[i][j]
+typedef enum {W, O, G, R, B, Y, LG} T_COLOR;
 
-typedef enum {UP, LEFT, FRONT, RIGHT, BACK, DOWN} T_SIDE;
 // Creates the enumerated type T_SIDE.
 // Used to access face with rubiks.faces[face]
+typedef enum {UP, LEFT, FRONT, RIGHT, BACK, DOWN} T_SIDE;
 
 typedef struct {
     T_COLOR grid[3][3];
-} FACES;
+} FACE;
 
 typedef struct {
-    FACES faces[6];
-    char solve[50000];
+    FACE faces[6];
+    char solve[1000];
     int move_nbr;
 } RUBIKS;
 
@@ -77,9 +77,9 @@ void init_rubiks(RUBIKS* rubiks);
  * ================
  */
 
-void disp_main(RUBIKS*);
 void display_rubiks(RUBIKS*);
 void display_movements(RUBIKS*);
+void fill_rubiks(RUBIKS*);
 void play_rubiks(RUBIKS*);
 void blank_rubiks(RUBIKS*);
 void free_rubiks(RUBIKS*);
@@ -124,20 +124,23 @@ void rotate_rubiks(RUBIKS*);
  * =========
  */
 
+void choice_solve(RUBIKS*);
 void solve_rubiks(RUBIKS*);
+int solve_fast(RUBIKS*);
+void speedrun_rubiks(RUBIKS*);
 T_SIDE middle_white(RUBIKS*);
 T_SIDE corner_white(RUBIKS*);
 int all_four_white(RUBIKS*);
 int perfect_cross(RUBIKS*);
-void white_cross(RUBIKS*);
+int white_cross(RUBIKS*);
 void solve_back(RUBIKS*);
 void solve_front(RUBIKS*);
 void solve_right(RUBIKS*);
 void solve_left(RUBIKS*);
-void white_face(RUBIKS*);
-void second_layer(RUBIKS*);
-void yellow_cross(RUBIKS*);
-void perfect_yellow_cross(RUBIKS*);
+int white_face(RUBIKS*);
+int second_layer(RUBIKS*);
+int yellow_cross(RUBIKS*);
+int perfect_yellow_cross(RUBIKS*);
 int corner_spot(RUBIKS*);
-void yellow_corners(RUBIKS*);
-void perfect_cube(RUBIKS*);
+int yellow_corners(RUBIKS*);
+int perfect_cube(RUBIKS*);
